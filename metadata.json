@@ -1,0 +1,6 @@
+{
+  "name": "Jan Drishti",
+  "description": "A civic-tech platform for Jharkhand connecting citizen-reported societal challenges with universities, industry, and government for verified, tracked solutions.",
+  "requestFramePermissions": ["camera", "microphone", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

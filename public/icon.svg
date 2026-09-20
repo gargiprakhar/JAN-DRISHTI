@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="forestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1B4332" />
+      <stop offset="100%" stop-color="#0F291E" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E2A63D" />
+      <stop offset="100%" stop-color="#C08A2E" />
+    </linearGradient>
+  </defs>
+  <!-- Background with subtle border -->
+  <rect width="512" height="512" rx="100" fill="url(#forestGrad)" />
+  <rect x="16" y="16" width="480" height="480" rx="84" fill="none" stroke="#C08A2E" stroke-width="4" stroke-opacity="0.3" />
+  
+  <!-- Civic Eye / Drishti Emblem -->
+  <!-- Outer Eye Shape -->
+  <path d="M76 256 C 140 140, 372 140, 436 256 C 372 372, 140 372, 76 256 Z" 
+        fill="none" 
+        stroke="#F5F8F6" 
+        stroke-width="22" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+
+  <!-- Golden Iris -->
+  <circle cx="256" cy="256" r="76" fill="url(#amberGrad)" />
+  
+  <!-- Deep Pupil with Civic Pillar / Sprout -->
+  <circle cx="256" cy="256" r="38" fill="#0F291E" />
+  <circle cx="270" cy="242" r="12" fill="#F5F8F6" />
+
+  <!-- Tri-connector Nodes (Citizens, Academia, Industry, Gov) -->
+  <circle cx="256" cy="96" r="14" fill="#C08A2E" />
+  <circle cx="256" cy="416" r="14" fill="#C08A2E" />
+  <circle cx="96" cy="256" r="14" fill="#C08A2E" />
+  <circle cx="416" cy="256" r="14" fill="#C08A2E" />
+
+  <!-- Subtle bridge lines -->
+  <line x1="256" y1="110" x2="256" y2="175" stroke="#C08A2E" stroke-width="6" stroke-linecap="round" stroke-dasharray="6,6" opacity="0.8" />
+  <line x1="256" y1="337" x2="256" y2="402" stroke="#C08A2E" stroke-width="6" stroke-linecap="round" stroke-dasharray="6,6" opacity="0.8" />
+</svg>
