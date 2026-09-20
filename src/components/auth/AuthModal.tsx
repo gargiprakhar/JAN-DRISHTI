@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { 
   X, 
   ShieldCheck, 
-  KeyRound, 
-  Smartphone, 
-  Mail, 
   CheckCircle2, 
   UserCheck, 
   Building2, 
@@ -32,10 +29,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   initialRole = 'citizen'
 }) => {
   const [selectedRole, setSelectedRole] = useState<Role>(initialRole);
-  const [authMethod, setAuthMethod] = useState<'aadhaar' | 'mobile' | 'email'>('aadhaar');
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [aadhaarConsent, setAadhaarConsent] = useState(true);
-  const [identifier, setIdentifier] = useState('');
   const [fullName, setFullName] = useState('');
   const [institution, setInstitution] = useState('');
   const [district, setDistrict] = useState(JHARKHAND_DISTRICTS[0]);
@@ -99,27 +94,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setErrorMsg('');
 
-    if (authMethod === 'aadhaar') {
-      const cleanAadhaar = aadhaarNumber.replace(/\D/g, '');
-      if (cleanAadhaar.length !== 12) {
-        setErrorMsg('Please enter a valid 12-digit Aadhaar Number (आधार संख्या)');
-        return;
-      }
-      if (!aadhaarConsent) {
-        setErrorMsg('Consent for UIDAI Aadhaar authentication is required under DPDP Act & Aadhaar Act');
-        return;
-      }
-      setIdentifier(`Aadhaar: XXXX-XXXX-${cleanAadhaar.slice(-4)}`);
-    } else if (authMethod === 'mobile') {
-      if (!identifier.trim()) {
-        setErrorMsg('Please enter a valid 10-digit mobile number');
-        return;
-      }
-    } else {
-      if (!identifier.trim() || !identifier.includes('@')) {
-        setErrorMsg('Please enter a valid institutional email address');
-        return;
-      }
+    const cleanAadhaar = aadhaarNumber.replace(/\D/g, '');
+    if (cleanAadhaar.length !== 12) {
+      setErrorMsg('Aadhaar login is compulsory. Please enter a valid 12-digit Aadhaar Number (अनिवार्य आधार संख्या)');
+      return;
+    }
+    if (!aadhaarConsent) {
+      setErrorMsg('Aadhaar verification consent is compulsory under the Aadhaar Act, 2016 and DPDP Act, 2023');
+      return;
     }
 
     setOtpStep(true);
@@ -129,17 +111,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     const entered = otpCode.join('');
     if (entered.length < 4) {
-      setErrorMsg('Please enter the 6-digit verification code');
+      setErrorMsg('Please enter the 6-digit UIDAI Aadhaar verification OTP');
       return;
     }
 
-    const authId = authMethod === 'aadhaar'
-      ? `Aadhaar: XXXX-XXXX-${aadhaarNumber.replace(/\D/g, '').slice(-4) || '1892'}`
-      : identifier;
+    const cleanAadhaar = aadhaarNumber.replace(/\D/g, '');
+    const authId = `Aadhaar: XXXX-XXXX-${cleanAadhaar.slice(-4) || '1892'}`;
 
     const newUser: UserProfile = {
       id: `u-${selectedRole}-${Date.now().toString().slice(-4)}`,
-      name: fullName.trim() || (authMethod === 'aadhaar' ? 'Aadhaar Verified Citizen' : `${selectedRole.toUpperCase()} User`),
+      name: fullName.trim() || 'Aadhaar Verified Citizen',
       role: selectedRole,
       emailOrPhone: authId,
       institutionOrOrg: institution || roleDefinitions[selectedRole].defaultOrg,
@@ -162,11 +143,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="bg-[#1B4332] px-6 py-4 text-[#F5F8F6] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[#C08A2E] text-[#0F291E] flex items-center justify-center">
-              <KeyRound className="w-4 h-4" />
+              <Fingerprint className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-serif text-base font-bold">Aadhaar & Role-Based Portal Authentication</h3>
-              <p className="text-[11px] text-[#A9C2B5]">UIDAI e-KYC / OTP verified access. No public guest access.</p>
+              <div className="flex items-center gap-2">
+                <h3 className="font-serif text-base font-bold">Compulsory Aadhaar Portal Login</h3>
+                <span className="bg-[#C08A2E] text-[#0F291E] font-mono text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                  Compulsory
+                </span>
+              </div>
+              <p className="text-[11px] text-[#A9C2B5]">Mandatory UIDAI e-KYC authentication. No unverified or guest access.</p>
             </div>
           </div>
           <button onClick={onClose} className="p-1 text-[#A9C2B5] hover:text-white rounded cursor-pointer">
@@ -177,6 +163,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="p-6">
           {!otpStep ? (
             <form onSubmit={handleSendOtp} className="space-y-4">
+              {/* Mandatory Notice */}
+              <div className="bg-[#E9F3ED] p-2.5 rounded-xl border border-[#2D6A4F]/20 flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#1B4332] shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#1B4332] leading-relaxed">
+                  <strong>Government of Jharkhand Mandate:</strong> Aadhaar authentication is compulsory across all portals to eliminate duplicate submissions, authenticate research credentials, and ensure auditability under the DPDP Act.
+                </p>
+              </div>
+
               {/* Role Selection Grid */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-2">
@@ -214,7 +208,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {/* Name input */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Full Legal Name (as in Aadhaar / Official ID):
+                  Full Legal Name (as in Aadhaar card):
                 </label>
                 <input
                   type="text"
@@ -226,143 +220,51 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 />
               </div>
 
-              {/* Authentication Option Selector */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-semibold text-gray-700">
-                    Authentication Option:
+              {/* Compulsory Aadhaar Authentication Section */}
+              <div className="space-y-2 bg-[#F9FBF9] p-3.5 rounded-xl border border-[#1B4332]/30 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-[#1B4332] flex items-center gap-1.5">
+                    <Fingerprint className="w-4 h-4 text-[#C08A2E]" />
+                    <span>Compulsory 12-Digit Aadhaar Number (अनिवार्य आधार संख्या):</span>
                   </label>
-                  <span className="text-[10px] text-[#1B4332] font-semibold bg-[#E9F3ED] px-2 py-0.5 rounded">
-                    UIDAI e-KYC Enabled
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-1.5 bg-[#F5F8F6] p-1 rounded-xl border border-gray-200 mb-2.5">
                   <button
                     type="button"
-                    onClick={() => {
-                      setAuthMethod('aadhaar');
-                      setErrorMsg('');
-                    }}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-medium transition cursor-pointer ${
-                      authMethod === 'aadhaar'
-                        ? 'bg-[#1B4332] text-white shadow-xs font-semibold'
-                        : 'text-gray-600 hover:text-[#14261C] hover:bg-white/60'
-                    }`}
+                    onClick={setDemoAadhaar}
+                    className="text-[10px] text-[#C08A2E] hover:underline font-bold cursor-pointer"
                   >
-                    <Fingerprint className="w-3.5 h-3.5" />
-                    <span>Aadhaar</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMethod('mobile');
-                      setErrorMsg('');
-                    }}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-medium transition cursor-pointer ${
-                      authMethod === 'mobile'
-                        ? 'bg-[#1B4332] text-white shadow-xs font-semibold'
-                        : 'text-gray-600 hover:text-[#14261C] hover:bg-white/60'
-                    }`}
-                  >
-                    <Smartphone className="w-3.5 h-3.5" />
-                    <span>Mobile (+91)</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuthMethod('email');
-                      setErrorMsg('');
-                    }}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-medium transition cursor-pointer ${
-                      authMethod === 'email'
-                        ? 'bg-[#1B4332] text-white shadow-xs font-semibold'
-                        : 'text-gray-600 hover:text-[#14261C] hover:bg-white/60'
-                    }`}
-                  >
-                    <Mail className="w-3.5 h-3.5" />
-                    <span>Email OTP</span>
+                    Use Demo Aadhaar
                   </button>
                 </div>
 
-                {/* Method-Specific Inputs */}
-                {authMethod === 'aadhaar' && (
-                  <div className="space-y-2 bg-[#F9FBF9] p-3 rounded-xl border border-[#D6E3DC]">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-semibold text-[#1B4332] flex items-center gap-1">
-                        <CreditCard className="w-3.5 h-3.5 text-[#C08A2E]" />
-                        <span>12-Digit Aadhaar Number (आधार संख्या):</span>
-                      </label>
-                      <button
-                        type="button"
-                        onClick={setDemoAadhaar}
-                        className="text-[10px] text-[#C08A2E] hover:underline font-semibold cursor-pointer"
-                      >
-                        Use Demo Aadhaar
-                      </button>
-                    </div>
+                <div className="relative">
+                  <CreditCard className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    required
+                    maxLength={14}
+                    placeholder="XXXX XXXX XXXX (e.g. 5821 9043 1892)"
+                    value={aadhaarNumber}
+                    onChange={(e) => handleAadhaarChange(e.target.value)}
+                    className="w-full text-xs font-mono font-bold tracking-wider pl-9 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1B4332] bg-white"
+                  />
+                </div>
+                <p className="text-[10px] text-gray-500">
+                  UIDAI OTP will be sent to the mobile number registered with your Aadhaar.
+                </p>
 
-                    <div className="relative">
-                      <Fingerprint className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-                      <input
-                        type="text"
-                        maxLength={14}
-                        placeholder="XXXX XXXX XXXX (e.g. 5821 9043 1892)"
-                        value={aadhaarNumber}
-                        onChange={(e) => handleAadhaarChange(e.target.value)}
-                        className="w-full text-xs font-mono font-bold tracking-wider pl-9 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#1B4332] bg-white"
-                      />
-                    </div>
-
-                    {/* Aadhaar Consent Checkbox */}
-                    <div className="flex items-start gap-2 pt-1 text-[11px] text-gray-600">
-                      <input
-                        type="checkbox"
-                        id="aadhaarConsent"
-                        checked={aadhaarConsent}
-                        onChange={(e) => setAadhaarConsent(e.target.checked)}
-                        className="mt-0.5 rounded text-[#1B4332] focus:ring-[#1B4332] cursor-pointer"
-                      />
-                      <label htmlFor="aadhaarConsent" className="leading-snug cursor-pointer select-none">
-                        I hereby consent to Jan Drishti (Govt. of Jharkhand) verifying my identity via UIDAI Aadhaar OTP / e-KYC in accordance with the Aadhaar Act, 2016.
-                      </label>
-                    </div>
-                  </div>
-                )}
-
-                {authMethod === 'mobile' && (
-                  <div className="relative">
-                    <div className="flex items-center">
-                      <span className="inline-flex items-center px-3 py-2 text-xs border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-gray-600">
-                        +91
-                      </span>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="98765 43210"
-                        value={identifier}
-                        onChange={(e) => setIdentifier(e.target.value)}
-                        className="w-full text-xs px-3 py-2 rounded-r-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#1B4332]"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {authMethod === 'email' && (
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-                    <input
-                      type="email"
-                      required
-                      placeholder="official.name@institution.gov.in"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      className="w-full text-xs pl-9 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-[#1B4332]"
-                    />
-                  </div>
-                )}
+                {/* Aadhaar Consent Checkbox */}
+                <div className="flex items-start gap-2 pt-1.5 text-[11px] text-gray-700">
+                  <input
+                    type="checkbox"
+                    id="aadhaarConsent"
+                    checked={aadhaarConsent}
+                    onChange={(e) => setAadhaarConsent(e.target.checked)}
+                    className="mt-0.5 rounded text-[#1B4332] focus:ring-[#1B4332] cursor-pointer"
+                  />
+                  <label htmlFor="aadhaarConsent" className="leading-snug cursor-pointer select-none">
+                    <span className="font-semibold text-[#1B4332]">Mandatory Consent:</span> I hereby consent to Jan Drishti (Govt. of Jharkhand) verifying my identity via UIDAI Aadhaar OTP / e-KYC in accordance with the Aadhaar Act, 2016 and DPDP Act, 2023.
+                  </label>
+                </div>
               </div>
 
               {/* Role specific input */}
@@ -398,7 +300,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               {errorMsg && (
-                <p className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200">
+                <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200 font-medium">
                   {errorMsg}
                 </p>
               )}
@@ -407,43 +309,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="submit"
                 className="w-full py-2.5 bg-[#1B4332] hover:bg-[#143427] text-white font-medium text-xs rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
-                {authMethod === 'aadhaar' ? (
-                  <>
-                    <Fingerprint className="w-4 h-4 text-[#C08A2E]" />
-                    <span>Authenticate with Aadhaar (Generate UIDAI OTP)</span>
-                  </>
-                ) : (
-                  <span>Generate Secure One-Time Password (OTP)</span>
-                )}
+                <Fingerprint className="w-4 h-4 text-[#C08A2E]" />
+                <span>Authenticate with Aadhaar (Generate UIDAI OTP)</span>
               </button>
             </form>
           ) : (
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               <div className="text-center space-y-1">
                 <div className="w-12 h-12 rounded-full bg-[#E9F3ED] text-[#1B4332] flex items-center justify-center mx-auto mb-2">
-                  {authMethod === 'aadhaar' ? (
-                    <Fingerprint className="w-6 h-6 text-[#1B4332]" />
-                  ) : (
-                    <Smartphone className="w-6 h-6" />
-                  )}
+                  <Fingerprint className="w-6 h-6 text-[#1B4332]" />
                 </div>
                 <h4 className="font-serif text-base font-bold text-[#14261C]">
-                  {authMethod === 'aadhaar' ? 'Enter 6-Digit Aadhaar OTP (आधार ओटीपी)' : 'Enter 6-Digit OTP'}
+                  Enter 6-Digit Aadhaar OTP (आधार ओटीपी)
                 </h4>
                 <p className="text-xs text-gray-600">
-                  {authMethod === 'aadhaar' ? (
-                    <>
-                      UIDAI verification OTP dispatched to registered mobile linked with{' '}
-                      <strong className="text-[#1B4332]">
-                        Aadhaar XXXX-XXXX-{aadhaarNumber.replace(/\D/g, '').slice(-4) || '1892'}
-                      </strong>
-                    </>
-                  ) : (
-                    <>
-                      A verification code has been dispatched to{' '}
-                      <strong className="text-[#1B4332]">{identifier || '+91 94311 88219'}</strong>
-                    </>
-                  )}
+                  UIDAI verification OTP dispatched to registered mobile linked with{' '}
+                  <strong className="text-[#1B4332]">
+                    Aadhaar XXXX-XXXX-{aadhaarNumber.replace(/\D/g, '').slice(-4) || '1892'}
+                  </strong>
                 </p>
               </div>
 
@@ -463,7 +346,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         (e.target.nextElementSibling as HTMLInputElement).focus();
                       }
                     }}
-                    className="w-10 h-11 text-center text-base font-bold rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1B4332] bg-white"
+                    className="w-10 h-11 text-center text-base font-mono font-bold rounded-lg border border-gray-300 focus:outline-none focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332]"
                   />
                 ))}
               </div>
@@ -490,9 +373,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 className="w-full py-2.5 bg-[#C08A2E] hover:bg-[#A97424] text-[#0F291E] font-bold text-xs rounded-xl transition cursor-pointer shadow-sm flex items-center justify-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>
-                  {authMethod === 'aadhaar' ? 'Verify Aadhaar & Enter Portal' : 'Verify Credentials & Enter Portal'}
-                </span>
+                <span>Verify Aadhaar & Enter Portal</span>
               </button>
 
               <button
@@ -500,7 +381,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 onClick={() => setOtpStep(false)}
                 className="w-full py-1.5 text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
               >
-                ← Back to Authentication Options
+                ← Back to Aadhaar Entry
               </button>
             </form>
           )}

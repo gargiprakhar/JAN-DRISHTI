@@ -8,7 +8,8 @@ import {
   WifiOff, 
   HelpCircle,
   Menu,
-  X
+  X,
+  Fingerprint
 } from 'lucide-react';
 import { Role, UserProfile } from '../../types';
 import { PWAInstallButton } from '../pwa/PWAInstallButton';
@@ -161,8 +162,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onOpenAuth}
               className="flex items-center gap-2 bg-[#C08A2E] hover:bg-[#A97424] text-[#0F291E] font-semibold text-xs px-4 py-2 rounded-lg transition shadow-sm cursor-pointer"
             >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Aadhaar / Portal Login</span>
+              <Fingerprint className="w-4 h-4" />
+              <span>Aadhaar Login</span>
             </button>
           )}
         </div>
@@ -235,8 +236,8 @@ export const Header: React.FC<HeaderProps> = ({
               }}
               className="w-full py-2 bg-[#C08A2E] text-[#0F291E] font-semibold text-xs rounded-lg flex items-center justify-center gap-1.5"
             >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Aadhaar / Portal Login</span>
+              <Fingerprint className="w-4 h-4" />
+              <span>Aadhaar Login</span>
             </button>
           )}
         </div>
